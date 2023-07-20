@@ -143,3 +143,23 @@ sjPlot::plot_model(test_sp_level,type="diag")
 sjPlot::plot_model(test_sp_level,type="eff",show.data = T)
 ```
 
+##conservative model
+```{r}
+#WEIGHTING VIA sqrt_inverse_se_pois
+test_main_conservative=glmmTMB::glmmTMB(
+  data=data %>% 
+    filter(BioShifts_prab%in%"ABUND",#use BioShifts estimated from abundance data
+           ABUNDANCE_TYPE%in%"Count"),#Use only BioTIME time series based on count data
+formula=slope_pois~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_inverse_se_pois)
+#Model Summary
+summary(test_main_conservative)
+MuMIn::r.squaredGLMM(test_main_conservative)
+#Model diagnostics
+sjPlot::plot_model(test_main_conservative,type="diag")
+sjPlot::plot_model(test_main_conservative,type="eff")
+```
+
