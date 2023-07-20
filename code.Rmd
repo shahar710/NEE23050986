@@ -4,3 +4,19 @@ author: "Shahar Chaikin"
 date: "7/20/2023"
 output: html_document
 ---
+
+This code presents the analyses used in NATECOLEVOL-23050986
+
+Packages
+```{r}
+library(tidyverse)
+library(glmmTMB)
+```
+
+Load the data
+```{r}
+data=read.csv("data.csv")
+```
+
+
+
