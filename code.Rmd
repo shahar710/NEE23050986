@@ -7,16 +7,33 @@ output: html_document
 
 This code presents the analyses used in NATECOLEVOL-23050986
 
-Packages
+#Packages
 ```{r}
 library(tidyverse)
 library(glmmTMB)
 ```
 
-Load the data
+#Load the data
 ```{r}
 data=read.csv("data.csv")
 ```
 
+#main effect
+The relationship between population trends and range shift velocities.
+Population trends (slopes) based on linear models with scaled abundance.
+```{r}
+test_main_effect=glmmTMB(data=data,
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n) #weights = 1/se_slope_corr
+glmmTMB::diagnose(test_main_effect)
+#Model Summary
+summary(test_main_effect)
+MuMIn::r.squaredGLMM(test_main_effect)
+#Model diagnostics
+sjPlot::plot_model(test_main_effect,type="diag")
+```
 
 
