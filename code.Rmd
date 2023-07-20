@@ -164,7 +164,7 @@ sjPlot::plot_model(test_main_conservative,type="eff")
 ```
 
 ##Ocean regions
-Categorize by oceans and check
+Categorize by oceans and plot
 ```{r}
 data=data %>% 
   mutate(ocean=case_when(latitude_mean<=90 & 
@@ -184,7 +184,7 @@ data=data %>%
                          longitude_mean<=180 &
                          longitude_mean>=110~"Oceania",
                          TRUE~"Other"))
-
+#plot regions
 ggplot(data)+
   geom_point(aes(x=longitude_mean,y=latitude_mean,color=ocean))
 ```
@@ -205,5 +205,45 @@ sjPlot::plot_model(test_main_ocean,type="diag")
 performance::check_collinearity(test_main_ocean)
 #Table with model results
 sjPlot::tab_model(test_main_ocean,digits = 3)
+```
+
+##Test with R^2 >= 0.5
+```{r}
+test_main_r2=glmmTMB::glmmTMB(data=data %>%
+                                filter(r.squared>= .5),
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_r2)
+MuMIn::r.squaredGLMM(test_main_r2)
+#Model diagnostics
+sjPlot::plot_model(test_main_r2,type="diag")
+sjPlot::plot_model(test_main_r2,type="eff")
+```
+
+##Test percent cahnge in abundance
+Population trends are based on GLMs with poisson error distribution.
+```{r}
+test_percent_change=glmmTMB::glmmTMB(
+  data=data %>%
+    filter(delta_fitted_percent_change<=150,
+           ABUNDANCE_TYPE%in%"Count"),
+formula=delta_fitted_percent_change~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n) 
+#Model Summary
+summary(test_percent_change)
+MuMIn::r.squaredGLMM(test_percent_change)
+#Model diagnostics
+sjPlot::plot_model(test_percent_change,type="diag")
+##ggeffects
+test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
+                                            terms="shift_of_min_sm [-9:43 by=1]") %>% 
+  mutate(ci=abs(conf.low-predicted))
 ```
 
