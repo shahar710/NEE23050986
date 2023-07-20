@@ -163,3 +163,47 @@ sjPlot::plot_model(test_main_conservative,type="diag")
 sjPlot::plot_model(test_main_conservative,type="eff")
 ```
 
+##Ocean regions
+Categorize by oceans and check
+```{r}
+data=data %>% 
+  mutate(ocean=case_when(latitude_mean<=90 & 
+                         latitude_mean>=0 &
+                         longitude_mean<=20 &
+                         longitude_mean>=-35~"NE. Atlantic",
+                         latitude_mean<=90 & 
+                         latitude_mean>=0 &
+                         longitude_mean<(-35) &
+                         longitude_mean>=-100~"NW. Atlantic",
+                         latitude_mean<=90 & 
+                         latitude_mean>=20 &
+                         longitude_mean<100 &
+                         longitude_mean>=-175~"NE. Pacific",
+                         latitude_mean<=3 & 
+                         latitude_mean>=-48 &
+                         longitude_mean<=180 &
+                         longitude_mean>=110~"Oceania",
+                         TRUE~"Other"))
+
+ggplot(data)+
+  geom_point(aes(x=longitude_mean,y=latitude_mean,color=ocean))
+```
+
+Test
+```{r}
+test_main_ocean=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*ocean+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_ocean)
+MuMIn::r.squaredGLMM(test_main_ocean)
+#Model diagnostics
+sjPlot::plot_model(test_main_ocean,type="diag")
+performance::check_collinearity(test_main_ocean)
+#Table with model results
+sjPlot::tab_model(test_main_ocean,digits = 3)
+```
+
