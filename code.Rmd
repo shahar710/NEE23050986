@@ -23,6 +23,11 @@ Set WD
 setwd("C:\\Users\\Belmaker-Video\\Desktop\\Shahar Chaikin\\on going research\\Depth and Biodiversity\\data\\abundance at range edge\\R\\organized_codes\\code_to_publish\\NATECOLEVOL-23050986")
 ```
 
+Digits
+```{r}
+options(scipen=999)
+```
+
 #main effect
 The relationship between population trends and range shift velocities.
 Population trends (slopes) based on linear models with scaled abundance.
@@ -254,7 +259,7 @@ formula=slope~shift_of_min_sm*spatial_pos+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
-weights =sqrt_n) #weights = 1/se_slope_corr
+weights =sqrt_n)
 #Model Summary
 summary(test_spat_pos)
 MuMIn::r.squaredGLMM(test_spat_pos)
@@ -265,4 +270,39 @@ performance::check_collinearity(test_spat_pos)
 sjPlot::plot_model(test_spat_pos,type="int")
 ```
 
+##Test hump-shaped pattern
+In an extreme shift scenario, former poleward populations might become the new equatorward populations.
+```{r}
+test_non_linear=glmmTMB::glmmTMB(
+  data=data %>%
+            filter(spatial_pos>0,
+                  shift_of_min_sm>0),#due to the quadratic transformation I eliminate negative shift values that cannot be backtransformed.
+formula=slope~I(shift_of_min_sm^2)+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_non_linear)
+MuMIn::r.squaredGLMM(test_non_linear)
+#Model diagnostics
+sjPlot::plot_model(test_non_linear,type="diag")
+sjPlot::plot_model(test_non_linear,type="eff")
+```
+
 #the effect of thermal position
+```{r}
+test_therm_pos=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*thermal_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_therm_pos)
+MuMIn::r.squaredGLMM(test_therm_pos)
+#Model diagnostics
+sjPlot::plot_model(test_therm_pos,type="diag")
+performance::check_collinearity(test_therm_pos)
+```
+
