@@ -247,3 +247,22 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
   mutate(ci=abs(conf.low-predicted))
 ```
 
+#The effect of spatial position
+```{r}
+test_spat_pos=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*spatial_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n) #weights = 1/se_slope_corr
+#Model Summary
+summary(test_spat_pos)
+MuMIn::r.squaredGLMM(test_spat_pos)
+
+#Model diagnostics
+sjPlot::plot_model(test_spat_pos,type="diag")
+performance::check_collinearity(test_spat_pos)
+sjPlot::plot_model(test_spat_pos,type="int")
+```
+
+#the effect of thermal position
