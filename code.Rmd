@@ -345,3 +345,25 @@ sjPlot::plot_model(test_abs_lat_sp,type="diag")
 #AIC
 AIC(test_abs_lat_sp)
 ```
+
+#pop. trends~vulnerability*shift velocity
+```{r}
+#Two-way interaction term
+test_vul_shift=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*scale(Vulnerability)+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_vul_shift)
+MuMIn::r.squaredGLMM(test_vul_shift)
+#Model diagnostics
+sjPlot::plot_model(test_vul_shift,type="diag")
+performance::check_collinearity(test_vul_shift)
+sjPlot::plot_model(
+  test_vul_shift,
+  terms=c("shift_of_min_sm","Vulnerability[10,88]"),
+  type = "eff")
+```
+
