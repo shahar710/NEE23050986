@@ -44,6 +44,8 @@ MuMIn::r.squaredGLMM(test_main_effect)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect,type="diag")
 sjPlot::plot_model(test_main_effect,type="eff",show.data = T)
+#AIC
+AIC(test_main_effect)
 ```
 
 ##remove extreme range shift velocities
@@ -252,7 +254,9 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
   mutate(ci=abs(conf.low-predicted))
 ```
 
-#The effect of spatial position
+#Spatial and thermal position
+
+##The effect of spatial position
 ```{r}
 test_spat_pos=glmmTMB::glmmTMB(data=data,
 formula=slope~shift_of_min_sm*spatial_pos+
@@ -268,9 +272,11 @@ MuMIn::r.squaredGLMM(test_spat_pos)
 sjPlot::plot_model(test_spat_pos,type="diag")
 performance::check_collinearity(test_spat_pos)
 sjPlot::plot_model(test_spat_pos,type="int")
+#AIC
+AIC(test_spat_pos)
 ```
 
-##Test hump-shaped pattern
+###Test hump-shaped pattern
 In an extreme shift scenario, former poleward populations might become the new equatorward populations.
 ```{r}
 test_non_linear=glmmTMB::glmmTMB(
@@ -290,7 +296,7 @@ sjPlot::plot_model(test_non_linear,type="diag")
 sjPlot::plot_model(test_non_linear,type="eff")
 ```
 
-#the effect of thermal position
+##the effect of thermal position
 ```{r}
 test_therm_pos=glmmTMB::glmmTMB(data=data,
 formula=slope~shift_of_min_sm*thermal_pos+
@@ -306,3 +312,36 @@ sjPlot::plot_model(test_therm_pos,type="diag")
 performance::check_collinearity(test_therm_pos)
 ```
 
+#latitude, fishing, and spatiotemporal mismatches
+##Pop. trends against abs. latitude
+```{r}
+test_abs_lat=glmmTMB::glmmTMB(data=data,
+formula=slope~abs_latitude_mean+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_abs_lat)
+MuMIn::r.squaredGLMM(test_abs_lat)
+#Model diagnostics
+sjPlot::plot_model(test_abs_lat,type="diag")
+AIC(test_abs_lat)
+```
+
+##Pop. trends ~ abs. lat. * spat. pos
+```{r}
+test_abs_lat_sp=glmmTMB::glmmTMB(data=data,
+formula=slope~abs_latitude_mean*spatial_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_abs_lat_sp)
+MuMIn::r.squaredGLMM(test_abs_lat_sp)
+#Model diagnostics
+sjPlot::plot_model(test_abs_lat_sp,type="diag")
+#AIC
+AIC(test_abs_lat_sp)
+```
