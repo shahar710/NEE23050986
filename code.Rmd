@@ -346,7 +346,7 @@ sjPlot::plot_model(test_abs_lat_sp,type="diag")
 AIC(test_abs_lat_sp)
 ```
 
-#pop. trends~vulnerability*shift velocity
+##pop. trends~vulnerability*shift velocity
 ```{r}
 #Two-way interaction term
 test_vul_shift=glmmTMB::glmmTMB(data=data,
@@ -365,5 +365,44 @@ sjPlot::plot_model(
   test_vul_shift,
   terms=c("shift_of_min_sm","Vulnerability[10,88]"),
   type = "eff")
+```
+
+##pop. trends~vulnerability*shift velocity*spatial pos.
+```{r}
+#Two-way interaction term
+test_vul_sp_shift=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*scale(Vulnerability)*spatial_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_vul_sp_shift)
+MuMIn::r.squaredGLMM(test_vul_sp_shift)
+#Model diagnostics
+sjPlot::plot_model(test_vul_sp_shift,type="diag")
+performance::check_collinearity(test_vul_sp_shift)
+sjPlot::plot_model(
+  test_vul_sp_shift,
+  terms=c("shift_of_min_sm","Vulnerability[10,88]","spatial_pos[-0.5,0,0.5]"),
+  type = "eff")+
+  theme_bw()
+```
+
+##Pop. trends ~ comm.
+```{r}
+#model
+test_pop_com=glmmTMB::glmmTMB(data=data,
+formula=slope~commercial_two_level+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_pop_com)
+MuMIn::r.squaredGLMM(test_pop_com)
+#Model diagnostics
+sjPlot::plot_model(test_pop_com,type="diag")
+sjPlot::plot_model(test_pop_com,type="eff")
 ```
 
