@@ -419,6 +419,7 @@ weights =sqrt_n)
 summary(test_pop_com_shift)
 MuMIn::r.squaredGLMM(test_pop_com_shift)
 #Model diagnostics
+performance::check_collinearity(test_pop_com_shift)
 sjPlot::plot_model(test_pop_com_shift,type="diag")
 sjPlot::plot_model(test_pop_com_shift,
                    type="eff",
@@ -450,3 +451,44 @@ sjPlot::plot_model(test_pop_com_shift,
         title = element_text(size=16))+
   theme_bw()
 ```
+
+#Spatial and temporal mismatch
+
+##spatial mismatch
+```{r}
+test_spat_mis=glmmTMB::glmmTMB(data=data,
+formula=slope~shift_of_min_sm*scale(spatial_pos)*scale(mean_bt_bs_dist_of_min_sm)+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n) #weights = 1/se_slope_corr
+#Model Summary
+summary(test_spat_mis)
+MuMIn::r.squaredGLMM(test_spat_mis)
+#Model diagnostics
+sjPlot::plot_model(test_spat_mis,type="diag")
+performance::check_collinearity(test_spat_mis)
+#plot
+sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","mean_bt_bs_dist_of_min_sm[10,100,1000]"),pred.type = "re")+#dot.size = 0.05, show.data = T
+  theme_bw()+
+    scale_color_manual(values=c("red","green","blue"))+
+  labs(y="Population trend (slope)",
+       x="Shift (km/ year)",
+       title="A) Spatial mismatch",
+       color="Spatial  position",
+       fill="Relative position")+
+  theme(strip.background = element_rect(
+     color="black", fill="white"))+
+  geom_hline(yintercept = 0,linetype="dashed")+
+  geom_vline(xintercept = 0,linetype="dashed")+
+  theme(strip.background = element_rect(
+     color="black", fill="white"))+
+  theme(panel.border = element_blank(), axis.line.y=element_line(color='purple'),
+        panel.grid = element_line(size=0.3),
+        axis.line.x = element_line(color='#ffb20a'),
+        axis.text.y=element_text(size=10),
+        axis.title = element_text(size=14),
+        axis.text.x = element_text(size=10),
+        title = element_text(size=16))
+```
+
