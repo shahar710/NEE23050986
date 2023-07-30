@@ -236,9 +236,8 @@ Population trends are based on GLMs with poisson error distribution.
 ```{r}
 test_percent_change=glmmTMB::glmmTMB(
   data=data %>%
-    filter(delta_fitted_percent_change<=150,
-           ABUNDANCE_TYPE%in%"Count"),
-formula=delta_fitted_percent_change~shift_of_min_sm+
+    filter(ABUNDANCE_TYPE%in%"Count"),
+formula=ln_ratio_fitted~shift_of_min_sm+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
@@ -248,10 +247,36 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
+sjPlot::plot_model(test_percent_change,type="eff",
+                   show.data = T)
 ##ggeffects
+#range
+data%>%
+    filter(ABUNDANCE_TYPE%in%"Count") %>%
+  select(shift_of_min_sm) %>% 
+  pull %>% 
+  range()
+#predict with exp
 test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
-                                            terms="shift_of_min_sm [-9:43 by=1]") %>% 
-  mutate(ci=abs(conf.low-predicted))
+                                            terms="shift_of_min_sm [-21:43 by=1]") %>% 
+  mutate(exp_predicted=exp(predicted) %>% 
+           round(digits=4),
+         exp_conf.high=exp(conf.high)%>% 
+           round(digits=4),
+         exp_conf.low=exp(conf.low)%>% 
+           round(digits=4)) %>% 
+  select(x,exp_predicted,exp_conf.low,exp_conf.high)
+
+ggplot()+
+  geom_hline(yintercept = 1,linetype="dashed")+
+  geom_ribbon(data=test_percent_change_gg,
+            aes(x=x,ymin=exp_conf.low,ymax=exp_conf.high),
+            alpha=0.4)+
+  geom_line(data=test_percent_change_gg,
+            aes(x=x,y=exp_predicted))+
+  theme_bw()+
+  labs(x="Shift velocity (km/ year)",
+       y= "Abundance ratio (T2/ T1)")
 ```
 
 #Spatial and thermal position
