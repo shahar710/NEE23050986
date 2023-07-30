@@ -269,6 +269,7 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
 
 ggplot()+
   geom_hline(yintercept = 1,linetype="dashed")+
+    geom_vline(xintercept = 0,linetype="dashed")+
   geom_ribbon(data=test_percent_change_gg,
             aes(x=x,ymin=exp_conf.low,ymax=exp_conf.high),
             alpha=0.4)+
