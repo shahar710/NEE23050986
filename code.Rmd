@@ -150,24 +150,80 @@ sjPlot::plot_model(test_sp_level,type="diag")
 sjPlot::plot_model(test_sp_level,type="eff",show.data = T)
 ```
 
-##conservative model
+##Replace weights
 ```{r}
-#WEIGHTING VIA sqrt_inverse_se_pois
-test_main_conservative=glmmTMB::glmmTMB(
+test_main_replace_w=glmmTMB::glmmTMB(
   data=data %>% 
-    filter(BioShifts_prab%in%"ABUND",#use BioShifts estimated from abundance data
-           ABUNDANCE_TYPE%in%"Count"),#Use only BioTIME time series based on count data
-formula=slope_pois~shift_of_min_sm+
+    mutate(sqrt_inverse_se=sqrt((1/(se_slope+0.0003)))),
+formula=slope~shift_of_min_sm+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
-weights =sqrt_inverse_se_pois)
+weights =sqrt_inverse_se)
 #Model Summary
-summary(test_main_conservative)
-MuMIn::r.squaredGLMM(test_main_conservative)
+summary(test_main_replace_w)
+MuMIn::r.squaredGLMM(test_main_replace_w)
 #Model diagnostics
-sjPlot::plot_model(test_main_conservative,type="diag")
-sjPlot::plot_model(test_main_conservative,type="eff")
+sjPlot::plot_model(test_main_replace_w,type="diag")
+sjPlot::plot_model(test_main_replace_w,type="eff")
+
+```
+
+
+##Abundance based range shifts model
+Excluding range shift estimates that are estimated from occurrence data.
+```{r}
+test_main_abundance_based=glmmTMB::glmmTMB(
+  data=data,#use BioShifts estimated from abundance data
+formula=slope~shift_of_min_sm*BioShifts_prab+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_abundance_based)
+MuMIn::r.squaredGLMM(test_main_abundance_based)
+#Model diagnostics
+sjPlot::plot_model(test_main_abundance_based,type="diag")
+sjPlot::plot_model(test_main_abundance_based,type="int")
+```
+
+
+##Bioshifts data 
+##Resurveyd
+```{r}
+test_res=glmmTMB::glmmTMB(
+  data=data %>% 
+    filter(BioShifts_quality %in%"RESURVEYED"),
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_res)
+MuMIn::r.squaredGLMM(test_res)
+#Model diagnostics
+sjPlot::plot_model(test_res,type="diag")
+sjPlot::plot_model(test_res,type="eff")
+```
+
+##Actual data (i.e., 'LOW')
+```{r}
+test_acdat=glmmTMB::glmmTMB(
+  data=data%>% 
+    filter(BioShifts_quality %in%"LOW"),
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_acdat)
+MuMIn::r.squaredGLMM(test_acdat)
+#Model diagnostics
+sjPlot::plot_model(test_acdat,type="diag")
+sjPlot::plot_model(test_acdat,type="eff")
 ```
 
 ##Ocean regions
@@ -265,7 +321,7 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
            round(digits=4),
          exp_conf.low=exp(conf.low)%>% 
            round(digits=4)) %>% 
-  select(x,exp_predicted,exp_conf.low,exp_conf.high)
+  select(x,exp_predicted,std.error,exp_conf.low,exp_conf.high)
 
 ggplot()+
   geom_hline(yintercept = 1,linetype="dashed")+
