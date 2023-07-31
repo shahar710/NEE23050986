@@ -190,7 +190,7 @@ sjPlot::plot_model(test_main_abundance_based,type="int")
 
 
 ##Bioshifts data 
-##Resurveyd
+###Resurveyd
 ```{r}
 test_res=glmmTMB::glmmTMB(
   data=data %>% 
@@ -208,7 +208,7 @@ sjPlot::plot_model(test_res,type="diag")
 sjPlot::plot_model(test_res,type="eff")
 ```
 
-##Actual data (i.e., 'LOW')
+###Actual data (i.e., 'LOW')
 ```{r}
 test_acdat=glmmTMB::glmmTMB(
   data=data%>% 
@@ -333,7 +333,21 @@ ggplot()+
             aes(x=x,y=exp_predicted))+
   theme_bw()+
   labs(x="Shift velocity (km/ year)",
-       y= "Abundance ratio (T2/ T1)")
+       y= "Abundance ratio (T2/ T1)",
+       title="Abundance change vs. range shift velocity")+
+  theme(panel.border = element_blank(),
+        axis.line.y=element_line(color='purple'),
+        axis.line.x = element_line(color='#ffb20a'),
+        axis.text.y=element_text(size=10),
+        axis.title = element_text(size=12),
+        axis.text.x = element_text(size=10),
+        title = element_text(size=12))+
+  geom_rug(data=data %>% 
+             filter(ln_ratio_fitted<=1.94591),
+           aes(x=shift_of_min_sm,y=exp(ln_ratio_fitted)),
+           alpha = 0.2,
+           size=.5,
+           inherit.aes = FALSE)
 ```
 
 #Spatial and thermal position
