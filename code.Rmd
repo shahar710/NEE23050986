@@ -18,11 +18,6 @@ library(glmmTMB)
 data=read.csv("data.csv")
 ```
 
-Set WD
-```{r}
-setwd("C:\\Users\\Belmaker-Video\\Desktop\\Shahar Chaikin\\on going research\\Depth and Biodiversity\\data\\abundance at range edge\\R\\organized_codes\\code_to_publish\\NATECOLEVOL-23050986")
-```
-
 Digits
 ```{r}
 options(scipen=999)
