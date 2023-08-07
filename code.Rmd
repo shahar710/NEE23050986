@@ -43,6 +43,28 @@ sjPlot::plot_model(test_main_effect,type="eff",show.data = T)
 AIC(test_main_effect)
 ```
 
+##mean shift velcoity
+Test the main effect using the mean shift velocity estimate
+```{r}
+test_main_effect_mean_shift=glmmTMB(data=data,
+formula=slope~mean_shift+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_effect_mean_shift)
+MuMIn::r.squaredGLMM(test_main_effect_mean_shift)
+#Model diagnostics
+sjPlot::plot_model(test_main_effect_mean_shift,type="diag")
+sjPlot::plot_model(test_main_effect_mean_shift,type="eff",show.data = T)
+#AIC
+AIC(test_main_effect_mean_shift)
+```
+
+
+
+
 ##remove extreme range shift velocities
 ```{r}
 #shift of minimum sm
@@ -165,8 +187,8 @@ sjPlot::plot_model(test_main_replace_w,type="eff")
 ```
 
 
-##Abundance based range shifts model
-Excluding range shift estimates that are estimated from occurrence data.
+##The effect of estimating range shifts from occurrence or abundance
+
 ```{r}
 test_main_abundance_based=glmmTMB::glmmTMB(
   data=data,#use BioShifts estimated from abundance data
@@ -282,7 +304,7 @@ sjPlot::plot_model(test_main_r2,type="diag")
 sjPlot::plot_model(test_main_r2,type="eff")
 ```
 
-##Test percent cahnge in abundance
+##Test percent change in abundance
 Population trends are based on GLMs with poisson error distribution.
 ```{r}
 test_percent_change=glmmTMB::glmmTMB(
@@ -316,8 +338,11 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
          exp_conf.high=exp(conf.high)%>% 
            round(digits=4),
          exp_conf.low=exp(conf.low)%>% 
-           round(digits=4)) %>% 
-  select(x,exp_predicted,std.error,exp_conf.low,exp_conf.high)
+           round(digits=4),
+         exp_prediceted_percent=(exp_predicted-1)*100,
+         exp_conf.low_percent=(exp_conf.low-1)*100,
+         exp_conf.high_percent=(exp_conf.high-1)*100) %>% 
+  select(x,exp_prediceted_percent,exp_conf.low_percent,exp_conf.high_percent)
 ```
 
 #Spatial and thermal position
