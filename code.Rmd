@@ -13,18 +13,18 @@ library(tidyverse)
 library(glmmTMB)
 ```
 
-#Load the data
+#Loading the data
 ```{r}
 data=read.csv("data.csv")
 ```
 
-Digits
+Use decimal numnbers
 ```{r}
 options(scipen=999)
 ```
 
 #main effect
-The relationship between population trends and range shift velocities.
+The relationship between population trends and range shift velocity.
 Population trends (slopes) based on linear models with scaled abundance.
 ```{r}
 test_main_effect=glmmTMB(data=data,
@@ -62,9 +62,6 @@ sjPlot::plot_model(test_main_effect_mean_shift,type="eff",show.data = T)
 AIC(test_main_effect_mean_shift)
 ```
 
-
-
-
 ##remove extreme range shift velocities
 ```{r}
 #shift of minimum sm
@@ -88,6 +85,7 @@ sjPlot::plot_model(test_main_effect_rm_ex_sh,type="eff")
 ```
 
 ##Leading edge range shift velocities
+Using only leading edge estimates from BioShifts
 ```{r}
 data_leading=read.csv("data_leading.csv")
 
@@ -107,6 +105,7 @@ sjPlot::plot_model(test_main_effect_leading,type="eff",show.data = T)
 
 
 ##Trailing edge range shift velocities
+Using only trailing edge estimates from BioShifts
 ```{r}
 data_trailing=read.csv("data_trailing.csv")
 
@@ -130,26 +129,16 @@ sjPlot::plot_model(test_main_effect_trailing,type="eff",show.data = T)
 species_level_shifts=data %>% 
   group_by(species) %>% 
   summarise(mean_shift_of_min_sm=mean(shift_of_min_sm),
-            n=n(),
-            sd=sd(shift_of_min_sm),
-            se=(sd/sqrt(n)),
-            moe=1.96*se,
-            ci_high_shift=mean_shift_of_min_sm+moe,
-            ci_low_shift=mean_shift_of_min_sm-moe)
+            n=n())
 
 #Create species level data
 data_sp_level=data %>% 
   group_by(species,family) %>% 
   summarise(n_es=n(),
-            mean_es=mean(slope),#weighted.mean(slope,w =n),
-            sd_es=sd(slope),
-            se_es=sd_es/sqrt(n_es),
-            moe_es=se_es*1.96,
-            ci_high_es=mean_es+moe_es,
-            ci_low_es=mean_es-moe_es)  %>%
+            mean_es=mean(slope))  %>%
   inner_join(species_level_shifts,by="species") %>% 
   ungroup() %>% 
-  mutate(across(c(4:10,12:16), round, 3),
+  mutate(across(c(4:5), round, 3),
          sqrt_n_es=sqrt(n_es))
 
 #Model
@@ -158,7 +147,7 @@ test_sp_level=glmmTMB::glmmTMB(data=data_sp_level,
 formula=mean_es~mean_shift_of_min_sm+
   (1|family),
 family = 'gaussian',
-weights =sqrt_n_es) #weights = 1/se_slope_corr
+weights =sqrt_n_es)
 #Model Summary
 summary(test_sp_level)
 MuMIn::r.squaredGLMM(test_sp_level)
@@ -168,6 +157,7 @@ sjPlot::plot_model(test_sp_level,type="eff",show.data = T)
 ```
 
 ##Replace weights
+Replace weights and use the square root transformed inverse SE of the slope
 ```{r}
 test_main_replace_w=glmmTMB::glmmTMB(
   data=data %>% 
@@ -183,12 +173,9 @@ MuMIn::r.squaredGLMM(test_main_replace_w)
 #Model diagnostics
 sjPlot::plot_model(test_main_replace_w,type="diag")
 sjPlot::plot_model(test_main_replace_w,type="eff")
-
 ```
 
-
 ##The effect of estimating range shifts from occurrence or abundance
-
 ```{r}
 test_main_abundance_based=glmmTMB::glmmTMB(
   data=data,#use BioShifts estimated from abundance data
@@ -205,8 +192,7 @@ sjPlot::plot_model(test_main_abundance_based,type="diag")
 sjPlot::plot_model(test_main_abundance_based,type="int")
 ```
 
-
-##Bioshifts data 
+##Controling for Bioshifts data quality levels
 ###Resurveyd
 ```{r}
 test_res=glmmTMB::glmmTMB(
@@ -266,7 +252,10 @@ data=data %>%
                          TRUE~"Other"))
 #plot regions
 ggplot(data)+
-  geom_point(aes(x=longitude_mean,y=latitude_mean,color=ocean))
+  geom_point(aes(x=longitude_mean,
+                 y=latitude_mean,
+                 color=ocean),
+             size=0.7)
 ```
 
 Test
@@ -320,10 +309,9 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
-sjPlot::plot_model(test_percent_change,type="eff",
-                   show.data = T)
+
 ##ggeffects
-#range
+#range of shift estimates
 data%>%
     filter(ABUNDANCE_TYPE%in%"Count") %>%
   select(shift_of_min_sm) %>% 
@@ -373,7 +361,7 @@ In an extreme shift scenario, former poleward populations might become the new e
 test_non_linear=glmmTMB::glmmTMB(
   data=data %>%
             filter(spatial_pos>0,
-                  shift_of_min_sm>0),#due to the quadratic transformation I eliminate negative shift values that cannot be backtransformed.
+                  shift_of_min_sm>0),#due to the quadratic transformation we eliminate negative shift values that cannot be back-transformed.
 formula=slope~I(shift_of_min_sm^2)+
   (1|family)+
   (1|study_id),
@@ -420,7 +408,7 @@ sjPlot::plot_model(test_abs_lat,type="diag")
 AIC(test_abs_lat)
 ```
 
-##Pop. trends ~ abs. lat. * spat. pos
+##Pop. trends against abs. lat. * spat. pos
 ```{r}
 test_abs_lat_sp=glmmTMB::glmmTMB(data=data,
 formula=slope~abs_latitude_mean*spatial_pos+
@@ -437,7 +425,7 @@ sjPlot::plot_model(test_abs_lat_sp,type="diag")
 AIC(test_abs_lat_sp)
 ```
 
-##pop. trends~vulnerability*shift velocity
+##pop. trends against vulnerability*shift velocity
 ```{r}
 #Two-way interaction term
 test_vul_shift=glmmTMB::glmmTMB(data=data,
@@ -458,7 +446,7 @@ sjPlot::plot_model(
   type = "eff")
 ```
 
-##pop. trends~vulnerability*shift velocity*spatial pos.
+##pop. trends against vulnerability*shift velocity*spatial pos.
 ```{r}
 #Two-way interaction term
 test_vul_sp_shift=glmmTMB::glmmTMB(data=data,
@@ -480,7 +468,7 @@ sjPlot::plot_model(
   theme_bw()
 ```
 
-##Pop. trends ~ commercial level
+##Pop. trends against commercial level
 ```{r}
 #model
 test_pop_com=glmmTMB::glmmTMB(data=data,
@@ -497,7 +485,7 @@ sjPlot::plot_model(test_pop_com,type="diag")
 sjPlot::plot_model(test_pop_com,type="eff")
 ```
 
-##Pop. trends ~ commercial level
+##Pop. trends against commercial level
 ```{r}
 #model
 test_pop_com_shift=glmmTMB::glmmTMB(data=data,
@@ -515,32 +503,6 @@ sjPlot::plot_model(test_pop_com_shift,type="diag")
 sjPlot::plot_model(test_pop_com_shift,
                    type="eff",
                    terms=c("shift_of_min_sm","spatial_pos[-0.5,0,0.5]","commercial_two_level"))
-
-sjPlot::plot_model(test_pop_com_shift,
-                   type="eff",
-                   terms =c("shift_of_min_sm",
-                            "spatial_pos[-0.5,0,0.5]",
-                           "commercial_two_level"))+
-      scale_color_manual(values=c("red","green","blue"))+
-  labs(y="Population trend (slope)",
-       x="Shift (km/ year)",
-       title="Commercial status",
-       color="Spatial  position",
-       fill="Relative position")+
-  theme(strip.background = element_rect(
-     color="black", fill="white"))+
-  geom_hline(yintercept = 0,linetype="dashed")+
-  geom_vline(xintercept = 0,linetype="dashed")+
-  theme(strip.background = element_rect(
-     color="black", fill="white"))+
-  theme(panel.border = element_blank(), axis.line.y=element_line(color='purple'),
-        panel.grid = element_line(size=0.3),
-        axis.line.x = element_line(color='#ffb20a'),
-        axis.text.y=element_text(size=10),
-        axis.title = element_text(size=14),
-        axis.text.x = element_text(size=10),
-        title = element_text(size=16))+
-  theme_bw()
 ```
 
 #Spatial and temporal mismatch
@@ -552,7 +514,7 @@ formula=slope~shift_of_min_sm*scale(spatial_pos)*scale(bt_bs_dist_of_min_sm)+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
-weights =sqrt_n) #weights = 1/se_slope_corr
+weights =sqrt_n)
 #Model Summary
 summary(test_spat_mis)
 MuMIn::r.squaredGLMM(test_spat_mis)
@@ -570,7 +532,7 @@ formula=slope~shift_of_min_sm*spatial_pos*scale(temporal_mismatch)+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
-weights =sqrt_n) #weights = 1/se_slope_corr
+weights =sqrt_n)
 #Model Summary
 summary(test_tm)
 MuMIn::r.squaredGLMM(test_tm)
