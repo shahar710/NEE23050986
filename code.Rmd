@@ -548,7 +548,7 @@ sjPlot::plot_model(test_pop_com_shift,
 ##spatial mismatch
 ```{r}
 test_spat_mis=glmmTMB::glmmTMB(data=data,
-formula=slope~shift_of_min_sm*scale(spatial_pos)*scale(mean_bt_bs_dist_of_min_sm)+
+formula=slope~shift_of_min_sm*scale(spatial_pos)*scale(bt_bs_dist_of_min_sm)+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
@@ -560,13 +560,13 @@ MuMIn::r.squaredGLMM(test_spat_mis)
 sjPlot::plot_model(test_spat_mis,type="diag")
 performance::check_collinearity(test_spat_mis)
 #plot
-sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","mean_bt_bs_dist_of_min_sm[10,100,1000]"),pred.type = "re")
+sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","bt_bs_dist_of_min_sm[10,100,1000]"),pred.type = "re")
 ```
 
 ##Temporal mismatch
 ```{r}
 test_tm=glmmTMB::glmmTMB(data=data,
-formula=slope~shift_of_min_sm*spatial_pos*scale(mean_temporal_mismatch)+
+formula=slope~shift_of_min_sm*spatial_pos*scale(temporal_mismatch)+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
@@ -578,6 +578,6 @@ MuMIn::r.squaredGLMM(test_tm)
 sjPlot::plot_model(test_tm,type="diag")
 performance::check_collinearity(test_tm)
 #plot
-sjPlot::plot_model(test_tm,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","mean_temporal_mismatch[-50,0,50]"),pred.type = "re")
+sjPlot::plot_model(test_tm,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","temporal_mismatch[-50,0,50]"),pred.type = "re")
 ```
 
