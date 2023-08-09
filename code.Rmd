@@ -362,7 +362,7 @@ test_non_linear=glmmTMB::glmmTMB(
   data=data %>%
             filter(spatial_pos>0,
                   shift_of_min_sm>0),#due to the quadratic transformation we eliminate negative shift values that cannot be back-transformed.
-formula=slope~I(shift_of_min_sm^2)+
+formula=slope~I(shift_of_min_sm^2)+shift_of_min_sm+
   (1|family)+
   (1|study_id),
 family = 'gaussian',
@@ -371,6 +371,7 @@ weights =sqrt_n)
 summary(test_non_linear)
 MuMIn::r.squaredGLMM(test_non_linear)
 #Model diagnostics
+performance::check_collinearity(test_non_linear)
 sjPlot::plot_model(test_non_linear,type="diag")
 sjPlot::plot_model(test_non_linear,type="eff")
 ```
