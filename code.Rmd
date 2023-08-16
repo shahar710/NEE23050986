@@ -278,14 +278,6 @@ sjPlot::tab_model(test_main_ocean,digits = 3)
 
 ##Test with R^2 >= 0.5
 ```{r}
-#summary of R square values
-data %>% 
-  ungroup %>% 
-  summarise(no_var_at_response=sum(is.na(data$r.squared)),
-            n_valid=nrow(data)-no_var_at_response,
-            mean_r2=mean(r.squared,na.rm = T),
-            sd_r2=sd(r.squared,na.rm = T),
-            se_r2=sd_r2/sqrt(n_valid))
 #Model
 test_main_r2=glmmTMB::glmmTMB(data=data %>%
                                 filter(r.squared>= .5),
