@@ -7,14 +7,22 @@ output: html_document
 
 Chunk for percent change in population trends
 ```{r}
-ggplot()+
+#data for visualization
+data_percent=data %>% 
+  select(unique_id,ln_ratio_fitted,shift_of_min_sm,ABUNDANCE_TYPE) %>% 
+  filter(ABUNDANCE_TYPE%in%"Count") %>% 
+  mutate(ratio_fitted=exp(ln_ratio_fitted),
+         percent_declined_ratio_fitted=100*(ratio_fitted-1)) %>% 
+  filter(ratio_fitted<=7)
+
+addition_figure_2=ggplot()+
   geom_hline(yintercept = 1,linetype="dashed")+
     geom_vline(xintercept = 0,linetype="dashed")+
   geom_ribbon(data=test_percent_change_gg,
-            aes(x=x,ymin=exp_conf.low,ymax=exp_conf.high),
+            aes(x=x,ymin=exp_conf.low_percent,ymax=exp_conf.high_percent),
             alpha=0.4)+
   geom_line(data=test_percent_change_gg,
-            aes(x=x,y=exp_predicted))+
+            aes(x=x,y=exp_prediceted_percent))+
   theme_bw()+
   labs(x="Shift velocity (km/ year)",
        y= "Abundance ratio (T2/ T1)",
@@ -26,15 +34,56 @@ ggplot()+
         axis.title = element_text(size=12),
         axis.text.x = element_text(size=10),
         title = element_text(size=12))+
-  geom_rug(data=data %>% 
-             filter(ln_ratio_fitted<=1.94591),
-           aes(x=shift_of_min_sm,y=exp(ln_ratio_fitted)),
+  geom_rug(data=data_percent,
+           aes(x=shift_of_min_sm,y=percent_declined_ratio_fitted),
            alpha = 0.2,
            size=.5,
            inherit.aes = FALSE)+
-  scale_y_continuous(breaks=seq(0,8, by=1))+
+  scale_y_continuous(breaks=c(-100,-50,0,50,100,200,300,400,500,600,700))+
   scale_x_continuous(breaks=seq(-20,40, by=10))
+addition_figure_2
+
+ggsave(plot = addition_figure_2, filename = "addition_figure_2.pdf",device ="pdf", width = 20, height = 12, units = "cm",dpi = 800)
 ```
+
+Chunk for removing extreme shift values
+```{r}
+##ggeffects
+test_main_effect_rm_ex_sh_gg=ggeffects::ggpredict(test_main_effect_rm_ex_sh,terms ='shift_of_min_sm[-5.844:9.74 by=0.5]')
+
+test_main_centroid_ol_rm_p=ggplot(data %>% filter(shift_of_min_sm<=9.74 & shift_of_min_sm>=-5.844))+
+    #geom_rect(aes(xmin=0,xmax=9,ymin=-1,ymax=1),fill='#ffb20a',alpha=0.005)+
+  geom_point(aes(x=shift_of_min_sm,y=slope,size=sqrt_n^2),alpha=0.5,color="grey")+
+  geom_line(data=test_main_effect_rm_ex_sh_gg ,aes(x=x,y=predicted),size=1,color="black")+
+  geom_ribbon(data=test_main_effect_rm_ex_sh_gg,aes(x=x,ymin=conf.low,ymax=conf.high),alpha=0.3)+
+  theme_bw()+
+  theme(panel.border = element_blank(),
+        axis.line.y=element_line(color='purple'),
+        axis.line.x = element_line(color='#ffb20a'),
+        axis.text.y=element_text(size=10),
+        axis.title = element_text(size=12),
+        axis.text.x = element_text(size=10,
+                                   hjust=1),
+        title = element_text(size=12))+
+  guides()+
+  geom_vline(xintercept = 0,linetype="dashed")+
+  geom_hline(yintercept = 0,linetype="dashed")+
+  labs(y="Population trend",
+       x="Shift velocity (km/ year)",
+       title="Population trend vs. shifts - removing extreme shift rates",
+       size="Years sampled")+
+    annotate(geom = "text",x = 8,y = 1,label= paste("Time series = ",n_distinct(data %>% 
+filter(shift_of_min_sm<=9.74 & shift_of_min_sm>=-5.844) %>% select(unique_id) %>% pull())))+
+  annotate(geom = "text",x = 8.9,y = 0.85,label= paste("P < 0.0001"))+
+  annotate(geom = "text",x = 8.45,y = 0.7,label= paste("Slope = -0.004"))
+test_main_centroid_ol_rm_p
+
+# ggsave(plot = test_main_centroid_ol_rm_p, filename = "test_main_centroid_ol_rm_p.pdf",device ="pdf", width = 20, height = 12, units = "cm",dpi = 800)
+# 
+# ggsave(plot = test_main_centroid_ol_rm_p, filename = "test_main_centroid_ol_rm_p.png",device ="jpeg", width = 20, height = 12, units = "cm",dpi = 800)
+
+```
+
 
 Chunk for commercial status - three way interaction
 ```{r}
