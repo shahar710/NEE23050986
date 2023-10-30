@@ -323,6 +323,18 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                
   select(x,exp_prediceted_percent,exp_conf.low_percent,exp_conf.high_percent)
 ```
 
+###Example species
+Example species of extreme range shift velocity and their change in population size
+```{r}
+data %>% 
+  group_by(species) %>% 
+  filter(shift_of_min_sm>=17) %>% 
+  summarise(populations=n_distinct(unique_id),
+            shift=min(shift_of_min_sm),
+            mean_decline=(100*(1-exp(mean(ln_ratio_fitted))))) %>% 
+  arrange(shift)
+```
+
 #Spatial and thermal position
 ##The effect of spatial position
 ```{r}
