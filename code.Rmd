@@ -5,8 +5,6 @@ date: "7/20/2023"
 output: html_document
 ---
 
-This code presents the analyses used in NATECOLEVOL-23050986A
-
 #Packages
 ```{r}
 library(tidyverse)
@@ -311,8 +309,7 @@ MuMIn::r.squaredGLMM(test_percent_change)
 sjPlot::plot_model(test_percent_change,type="diag")
 ##ggeffects
 #predict with exp
-test_percent_change_gg=ggeffects::ggpredict(test_percent_change,
-                                            terms="shift_of_min_sm [-21:43 by=1]") %>% 
+test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                                           terms="shift_of_min_sm [-21:43 by=1]") %>% 
   as_tibble() %>% 
   mutate(exp_predicted=exp(predicted) %>% 
            round(digits=4),
@@ -384,6 +381,80 @@ MuMIn::r.squaredGLMM(test_therm_pos)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos,type="diag")
 performance::check_collinearity(test_therm_pos)
+```
+
+###Subsetting by species habitat (i.e., benthic, benthopelagic, and pelagic)
+Habitat summary - delete before publishing
+```{r}
+data %>% 
+  group_by(habitat) %>% 
+  summarise(S=n_distinct(species),
+            prop=(S/146)*100)
+
+data %>% 
+  group_by(habitat) %>% 
+  summarise(S=n_distinct(unique_id),
+            prop=(S/2572)*100)
+```
+
+####Benthic
+```{r}
+#model
+test_therm_pos_b=glmmTMB::glmmTMB(
+  data=data %>% 
+  filter(habitat%in%c("b")),
+formula=slope~shift_of_min_sm*thermal_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_therm_pos_b)
+MuMIn::r.squaredGLMM(test_therm_pos_b)
+#Model diagnostics
+sjPlot::plot_model(test_therm_pos_b,type="diag")
+performance::check_collinearity(test_therm_pos_b)
+sjPlot::plot_model(test_therm_pos_b,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
+```
+
+####Benthopelagic + benthic
+```{r}
+#model
+test_therm_pos_bp=glmmTMB::glmmTMB(
+  data=data %>% 
+  filter(habitat%in%c("bp","b")),
+formula=slope~shift_of_min_sm*thermal_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_therm_pos_bp)
+MuMIn::r.squaredGLMM(test_therm_pos_bp)
+#Model diagnostics
+sjPlot::plot_model(test_therm_pos_bp,type="diag")
+performance::check_collinearity(test_therm_pos_bp)
+sjPlot::plot_model(test_therm_pos_bp,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
+```
+
+####Pelagic
+```{r}
+#model
+test_therm_pos_p=glmmTMB::glmmTMB(
+  data=data %>% 
+  filter(habitat%in%c("p")),
+formula=slope~shift_of_min_sm*thermal_pos+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_therm_pos_p)
+MuMIn::r.squaredGLMM(test_therm_pos_p)
+#Model diagnostics
+sjPlot::plot_model(test_therm_pos_p,type="diag")
+performance::check_collinearity(test_therm_pos_p)
+sjPlot::plot_model(test_therm_pos_p,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 ```
 
 #latitude, fishing, and spatiotemporal mismatches
