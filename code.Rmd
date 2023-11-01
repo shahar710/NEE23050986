@@ -335,6 +335,45 @@ data %>%
   arrange(shift)
 ```
 
+#Poleward vs. equatorward range shift velocities
+##Poleward
+```{r}
+#model
+test_main_effect_poleward=glmmTMB(
+  data=data %>% 
+    filter(shift_of_min_sm>0),
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_effect_poleward)
+MuMIn::r.squaredGLMM(test_main_effect_poleward)
+#Model diagnostics
+sjPlot::plot_model(test_main_effect_poleward,type="diag")
+sjPlot::plot_model(test_main_effect_poleward,type="eff",show.data = T)
+```
+
+##Equatorward
+```{r}
+#model
+test_main_effect_equatorward=glmmTMB(
+  data=data %>% 
+    filter(shift_of_min_sm<0),
+formula=slope~shift_of_min_sm+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_effect_equatorward)
+MuMIn::r.squaredGLMM(test_main_effect_equatorward)
+#Model diagnostics
+sjPlot::plot_model(test_main_effect_equatorward,type="diag")
+sjPlot::plot_model(test_main_effect_equatorward,type="eff",show.data = T)
+```
+
 #Spatial and thermal position
 ##The effect of spatial position
 ```{r}
