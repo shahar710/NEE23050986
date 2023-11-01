@@ -336,6 +336,25 @@ data %>%
 ```
 
 #Poleward vs. equatorward range shift velocities
+##Absolute values
+```{r}
+#model
+test_main_effect_abs=glmmTMB(
+  data=data %>% 
+    mutate(abs_shift=abs(shift_of_min_sm)),
+formula=slope~abs_shift+
+  (1|family)+
+  (1|study_id),
+family = 'gaussian',
+weights =sqrt_n)
+#Model Summary
+summary(test_main_effect_abs)
+MuMIn::r.squaredGLMM(test_main_effect_abs)
+#Model diagnostics
+sjPlot::plot_model(test_main_effect_abs,type="diag")
+sjPlot::plot_model(test_main_effect_abs,type="eff",show.data = T,terms = "abs_shift [all]")
+```
+
 ##Poleward
 ```{r}
 #model
