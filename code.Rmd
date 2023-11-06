@@ -335,7 +335,7 @@ data %>%
   arrange(shift)
 ```
 
-#Poleward vs. equatorward range shift velocities
+#Poleward (positive) vs. equatorward (negative) range shift velocities
 ##Absolute values
 ```{r}
 #model
@@ -352,7 +352,7 @@ summary(test_main_effect_abs)
 MuMIn::r.squaredGLMM(test_main_effect_abs)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_abs,type="diag")
-sjPlot::plot_model(test_main_effect_abs,type="eff",show.data = T,terms = "abs_shift [all]")
+sjPlot::plot_model(test_main_effect_abs,type="pred",show.data = T,terms = "abs_shift [all]",pred.type = "fe")
 ```
 
 ##Poleward
