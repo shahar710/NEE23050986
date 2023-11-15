@@ -47,7 +47,9 @@ AIC(test_main_effect)
 #model
 test_main_effect_abs=glmmTMB(
   data=data %>% 
-    mutate(abs_shift=abs(shift_of_min_sm)),
+    mutate(abs_shift=abs(shift_of_min_sm),
+           shift_direction=case_when(shift_of_min_sm>0~"Poleward",
+                                     shift_of_min_sm<0~"Equatorward")),
 formula=slope~abs_shift+
   (1|family)+
   (1|study_id),
@@ -169,7 +171,7 @@ summary(test_sp_level)
 MuMIn::r.squaredGLMM(test_sp_level)
 #Model diagnostics
 sjPlot::plot_model(test_sp_level,type="diag")
-sjPlot::plot_model(test_sp_level,type="eff",show.data = T)
+sjPlot::plot_model(test_sp_level,type="pred",show.data = T,terms="mean_shift_of_min_sm [all]",pred.type = "fe")
 ```
 
 ##Replace weights
@@ -326,6 +328,8 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
+sjPlot::plot_model(test_percent_change,type="pred",pred.type = "re")
+
 ##ggeffects
 #predict with exp
 test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                                           terms="shift_of_min_sm [-21:43 by=1]") %>% 
@@ -347,11 +351,12 @@ Example species of extreme range shift velocity and their change in population s
 ```{r}
 data %>% 
   group_by(species) %>% 
-  filter(shift_of_min_sm>=17) %>% 
+  filter(shift_of_min_sm>=10) %>% 
   summarise(populations=n_distinct(unique_id),
             shift=min(shift_of_min_sm),
-            mean_decline=(100*(1-exp(mean(ln_ratio_fitted))))) %>% 
-  arrange(shift)
+            mean_decline=(100*(1-exp(mean(ln_ratio_fitted)))) %>% 
+              round(digits=2)) %>% 
+  arrange(mean_decline,shift,populations)
 ```
 
 #Poleward vs. equatorward range shift velocities
