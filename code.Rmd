@@ -42,27 +42,6 @@ sjPlot::plot_model(test_main_effect,type="eff",show.data = T)
 AIC(test_main_effect)
 ```
 
-##Absolute range shift values
-```{r}
-#model
-test_main_effect_abs=glmmTMB(
-  data=data %>% 
-    mutate(abs_shift=abs(shift_of_min_sm),
-           shift_direction=case_when(shift_of_min_sm>0~"Poleward",
-                                     shift_of_min_sm<0~"Equatorward")),
-formula=slope~abs_shift+
-  (1|family)+
-  (1|study_id),
-family = 'gaussian',
-weights =sqrt_n)
-#Model Summary
-summary(test_main_effect_abs)
-MuMIn::r.squaredGLMM(test_main_effect_abs)
-#Model diagnostics
-sjPlot::plot_model(test_main_effect_abs,type="diag")
-sjPlot::plot_model(test_main_effect_abs,type="pred",show.data = T,terms = "abs_shift [all]",pred.type = "fe")
-```
-
 ##mean shift velcoity
 Test the main effect using the mean shift velocity estimate
 ```{r}
@@ -328,7 +307,7 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
-sjPlot::plot_model(test_percent_change,type="pred",pred.type = "re")
+sjPlot::plot_model(test_percent_change,type="pred",pred.type = "fe")
 
 ##ggeffects
 #predict with exp
@@ -670,7 +649,7 @@ MuMIn::r.squaredGLMM(test_spat_mis)
 sjPlot::plot_model(test_spat_mis,type="diag")
 performance::check_collinearity(test_spat_mis)
 #plot
-sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","bt_bs_dist_of_min_sm[10,100,1000]"),pred.type = "re")
+sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","bt_bs_dist_of_min_sm[10,100,1000]"))
 ```
 
 ##Temporal mismatch
@@ -689,5 +668,5 @@ MuMIn::r.squaredGLMM(test_tm)
 sjPlot::plot_model(test_tm,type="diag")
 performance::check_collinearity(test_tm)
 #plot
-sjPlot::plot_model(test_tm,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","temporal_mismatch[-50,0,50]"),pred.type = "re")
+sjPlot::plot_model(test_tm,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","temporal_mismatch[-50,0,50]"))
 ```
