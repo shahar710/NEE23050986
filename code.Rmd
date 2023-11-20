@@ -1,9 +1,13 @@
 ---
 title: "code"
-author: "Shahar Chaikin"
+author: "DBPR"
 date: "7/20/2023"
 output: html_document
 ---
+
+This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts are not climate change 'winners'"
+For more information please contact DBPR
+DOI:
 
 #Packages
 ```{r}
@@ -37,7 +41,7 @@ summary(test_main_effect)
 MuMIn::r.squaredGLMM(test_main_effect)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect,type="diag")
-sjPlot::plot_model(test_main_effect,type="eff",show.data = T)
+sjPlot::plot_model(test_main_effect,type="eff")
 #AIC
 AIC(test_main_effect)
 ```
@@ -57,7 +61,7 @@ summary(test_main_effect_mean_shift)
 MuMIn::r.squaredGLMM(test_main_effect_mean_shift)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_mean_shift,type="diag")
-sjPlot::plot_model(test_main_effect_mean_shift,type="eff",show.data = T)
+sjPlot::plot_model(test_main_effect_mean_shift,type="eff")
 #AIC
 AIC(test_main_effect_mean_shift)
 ```
@@ -100,9 +104,8 @@ summary(test_main_effect_leading)
 MuMIn::r.squaredGLMM(test_main_effect_leading)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_leading,type="diag")
-sjPlot::plot_model(test_main_effect_leading,type="eff",show.data = T)
+sjPlot::plot_model(test_main_effect_leading,type="eff")
 ```
-
 
 ##Trailing edge range shift velocities
 Using only trailing edge estimates from BioShifts
@@ -120,7 +123,7 @@ summary(test_main_effect_trailing)
 MuMIn::r.squaredGLMM(test_main_effect_trailing)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_trailing,type="diag")
-sjPlot::plot_model(test_main_effect_trailing,type="eff",show.data = T)
+sjPlot::plot_model(test_main_effect_trailing,type="eff")
 ```
 
 ##species level
@@ -150,7 +153,7 @@ summary(test_sp_level)
 MuMIn::r.squaredGLMM(test_sp_level)
 #Model diagnostics
 sjPlot::plot_model(test_sp_level,type="diag")
-sjPlot::plot_model(test_sp_level,type="pred",show.data = T,terms="mean_shift_of_min_sm [all]",pred.type = "fe")
+sjPlot::plot_model(test_sp_level,type="eff")
 ```
 
 ##Replace weights
@@ -307,10 +310,10 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
-sjPlot::plot_model(test_percent_change,type="pred",pred.type = "fe")
+sjPlot::plot_model(test_percent_change,type="eff")
 
 ##ggeffects
-#predict with exp
+#predict table for back transformed values
 test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                                           terms="shift_of_min_sm [-21:43 by=1]") %>% 
   as_tibble() %>% 
   mutate(exp_predicted=exp(predicted) %>% 
@@ -326,20 +329,20 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                
 ```
 
 ###Example species
-Example species of extreme range shift velocity and their change in population size
+Example species of extreme range shift velocity and their associated change in population size
 ```{r}
 data %>% 
   group_by(species) %>% 
-  filter(shift_of_min_sm>=10) %>% 
+  filter(shift_of_min_sm>=17) %>% 
   summarise(populations=n_distinct(unique_id),
             shift=min(shift_of_min_sm),
             mean_decline=(100*(1-exp(mean(ln_ratio_fitted)))) %>% 
               round(digits=2)) %>% 
   arrange(mean_decline,shift,populations)
+#Positive 'mean_decline' values denote negative percentage change in population size
 ```
 
 #Poleward vs. equatorward range shift velocities
-
 ##Poleward
 ```{r}
 #model
@@ -356,7 +359,7 @@ summary(test_main_effect_poleward)
 MuMIn::r.squaredGLMM(test_main_effect_poleward)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_poleward,type="diag")
-sjPlot::plot_model(test_main_effect_poleward,type="eff",show.data = T)
+sjPlot::plot_model(test_main_effect_poleward,type="eff")
 ```
 
 ##Equatorward
@@ -377,7 +380,7 @@ summary(test_main_effect_equatorward)
 MuMIn::r.squaredGLMM(test_main_effect_equatorward)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_equatorward,type="diag")
-sjPlot::plot_model(test_main_effect_equatorward,type="eff",show.data = T,terms = "abs_shift [all]")
+sjPlot::plot_model(test_main_effect_equatorward,type="eff")
 ```
 
 #Spatial and thermal position
@@ -396,7 +399,7 @@ MuMIn::r.squaredGLMM(test_spat_pos)
 #Model diagnostics
 sjPlot::plot_model(test_spat_pos,type="diag")
 performance::check_collinearity(test_spat_pos)
-sjPlot::plot_model(test_spat_pos,type="int")
+sjPlot::plot_model(test_spat_pos,type="eff",terms=c("shift_of_min_sm","spatial_pos[-0.5,0,0.5]"))
 #AIC
 AIC(test_spat_pos)
 ```
@@ -437,23 +440,11 @@ summary(test_therm_pos)
 MuMIn::r.squaredGLMM(test_therm_pos)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos,type="diag")
+sjPlot::plot_model(test_therm_pos,type="eff",terms=c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 performance::check_collinearity(test_therm_pos)
 ```
 
 ###Subsetting by species habitat (i.e., benthic, benthopelagic, and pelagic)
-Habitat summary - delete before publishing
-```{r}
-data %>% 
-  group_by(habitat) %>% 
-  summarise(S=n_distinct(species),
-            prop=(S/146)*100)
-
-data %>% 
-  group_by(habitat) %>% 
-  summarise(S=n_distinct(unique_id),
-            prop=(S/2572)*100)
-```
-
 ####Benthic
 ```{r}
 #model
@@ -529,6 +520,7 @@ summary(test_abs_lat)
 MuMIn::r.squaredGLMM(test_abs_lat)
 #Model diagnostics
 sjPlot::plot_model(test_abs_lat,type="diag")
+sjPlot::plot_model(test_abs_lat,type="eff")
 AIC(test_abs_lat)
 ```
 
@@ -546,6 +538,7 @@ summary(test_abs_lat_sp)
 MuMIn::r.squaredGLMM(test_abs_lat_sp)
 #Model diagnostics
 sjPlot::plot_model(test_abs_lat_sp,type="diag")
+sjPlot::plot_model(test_abs_lat_sp,type="eff",terms=c("abs_latitude_mean","spatial_pos[-0.5,0,0.5]"))
 #AIC
 AIC(test_abs_lat_sp)
 ```
