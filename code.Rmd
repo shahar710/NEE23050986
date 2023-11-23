@@ -5,7 +5,7 @@ date: "7/20/2023"
 output: html_document
 ---
 
-This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts are not climate change 'winners'"
+This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts are not climate change ‘winners’"
 For more information please contact DBPR
 DOI:
 
@@ -627,6 +627,7 @@ sjPlot::plot_model(test_pop_com_shift,
 
 #Spatial and temporal mismatch
 ##spatial mismatch
+The spatial distance is the distance (in kilometer) between the location of a BioTIME population and the location in which the range shift velocity centroid is.
 ```{r}
 #model
 test_spat_mis=glmmTMB::glmmTMB(data=data,
@@ -646,6 +647,7 @@ sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_p
 ```
 
 ##Temporal mismatch
+The temporal distance is the distance (in years) between the year in which a BioTIME population assessment has begun and the year in which the range shift velocity assessment has begun.
 ```{r}
 #model
 test_tm=glmmTMB::glmmTMB(data=data,
