@@ -1,13 +1,12 @@
 ---
 title: "code"
 author: "DBPR"
-date: "7/20/2023"
+date: "11/26/2023"
 output: html_document
 ---
-
 This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts are not climate change ‘winners’"
 For more information please contact DBPR
-DOI:
+
 
 #Packages
 ```{r}
@@ -41,7 +40,6 @@ summary(test_main_effect)
 MuMIn::r.squaredGLMM(test_main_effect)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect,type="diag")
-sjPlot::plot_model(test_main_effect,type="eff")
 #AIC
 AIC(test_main_effect)
 ```
@@ -61,7 +59,6 @@ summary(test_main_effect_mean_shift)
 MuMIn::r.squaredGLMM(test_main_effect_mean_shift)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_mean_shift,type="diag")
-sjPlot::plot_model(test_main_effect_mean_shift,type="eff")
 #AIC
 AIC(test_main_effect_mean_shift)
 ```
@@ -85,7 +82,6 @@ summary(test_main_effect_rm_ex_sh)
 MuMIn::r.squaredGLMM(test_main_effect_rm_ex_sh)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_rm_ex_sh,type="diag")
-sjPlot::plot_model(test_main_effect_rm_ex_sh,type="eff")
 ```
 
 ##Leading edge range shift velocities
@@ -104,7 +100,6 @@ summary(test_main_effect_leading)
 MuMIn::r.squaredGLMM(test_main_effect_leading)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_leading,type="diag")
-sjPlot::plot_model(test_main_effect_leading,type="eff")
 ```
 
 ##Trailing edge range shift velocities
@@ -123,7 +118,6 @@ summary(test_main_effect_trailing)
 MuMIn::r.squaredGLMM(test_main_effect_trailing)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_trailing,type="diag")
-sjPlot::plot_model(test_main_effect_trailing,type="eff")
 ```
 
 ##species level
@@ -153,7 +147,6 @@ summary(test_sp_level)
 MuMIn::r.squaredGLMM(test_sp_level)
 #Model diagnostics
 sjPlot::plot_model(test_sp_level,type="diag")
-sjPlot::plot_model(test_sp_level,type="eff")
 ```
 
 ##Replace weights
@@ -173,7 +166,6 @@ summary(test_main_replace_w)
 MuMIn::r.squaredGLMM(test_main_replace_w)
 #Model diagnostics
 sjPlot::plot_model(test_main_replace_w,type="diag")
-sjPlot::plot_model(test_main_replace_w,type="eff")
 ```
 
 ##The effect of estimating range shifts from occurrence or abundance
@@ -191,7 +183,6 @@ summary(test_main_abundance_based)
 MuMIn::r.squaredGLMM(test_main_abundance_based)
 #Model diagnostics
 sjPlot::plot_model(test_main_abundance_based,type="diag")
-sjPlot::plot_model(test_main_abundance_based,type="int")
 ```
 
 ##Controling for Bioshifts data quality levels
@@ -211,7 +202,6 @@ summary(test_res)
 MuMIn::r.squaredGLMM(test_res)
 #Model diagnostics
 sjPlot::plot_model(test_res,type="diag")
-sjPlot::plot_model(test_res,type="eff")
 ```
 
 ###Actual data (i.e., 'LOW')
@@ -230,11 +220,10 @@ summary(test_acdat)
 MuMIn::r.squaredGLMM(test_acdat)
 #Model diagnostics
 sjPlot::plot_model(test_acdat,type="diag")
-sjPlot::plot_model(test_acdat,type="eff")
 ```
 
 ##Ocean regions
-Categorize by oceans and plot
+Categorize by oceans
 ```{r}
 data=data %>% 
   mutate(ocean=case_when(latitude_mean<=90 & 
@@ -290,7 +279,6 @@ summary(test_main_r2)
 MuMIn::r.squaredGLMM(test_main_r2)
 #Model diagnostics
 sjPlot::plot_model(test_main_r2,type="diag")
-sjPlot::plot_model(test_main_r2,type="eff")
 ```
 
 ##Test percent change in abundance
@@ -310,7 +298,6 @@ summary(test_percent_change)
 MuMIn::r.squaredGLMM(test_percent_change)
 #Model diagnostics
 sjPlot::plot_model(test_percent_change,type="diag")
-sjPlot::plot_model(test_percent_change,type="eff")
 
 ##ggeffects
 #predict table for back transformed values
@@ -359,7 +346,6 @@ summary(test_main_effect_poleward)
 MuMIn::r.squaredGLMM(test_main_effect_poleward)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_poleward,type="diag")
-sjPlot::plot_model(test_main_effect_poleward,type="eff")
 ```
 
 ##Equatorward
@@ -380,7 +366,6 @@ summary(test_main_effect_equatorward)
 MuMIn::r.squaredGLMM(test_main_effect_equatorward)
 #Model diagnostics
 sjPlot::plot_model(test_main_effect_equatorward,type="diag")
-sjPlot::plot_model(test_main_effect_equatorward,type="eff")
 ```
 
 #Spatial and thermal position
@@ -399,7 +384,6 @@ MuMIn::r.squaredGLMM(test_spat_pos)
 #Model diagnostics
 sjPlot::plot_model(test_spat_pos,type="diag")
 performance::check_collinearity(test_spat_pos)
-sjPlot::plot_model(test_spat_pos,type="eff",terms=c("shift_of_min_sm","spatial_pos[-0.5,0,0.5]"))
 #AIC
 AIC(test_spat_pos)
 ```
@@ -423,7 +407,6 @@ MuMIn::r.squaredGLMM(test_non_linear)
 #Model diagnostics
 performance::check_collinearity(test_non_linear)
 sjPlot::plot_model(test_non_linear,type="diag")
-sjPlot::plot_model(test_non_linear,type="eff")
 ```
 
 ##the effect of thermal position
@@ -440,7 +423,6 @@ summary(test_therm_pos)
 MuMIn::r.squaredGLMM(test_therm_pos)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos,type="diag")
-sjPlot::plot_model(test_therm_pos,type="eff",terms=c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 performance::check_collinearity(test_therm_pos)
 ```
 
@@ -462,7 +444,6 @@ MuMIn::r.squaredGLMM(test_therm_pos_b)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos_b,type="diag")
 performance::check_collinearity(test_therm_pos_b)
-sjPlot::plot_model(test_therm_pos_b,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 ```
 
 ####Benthopelagic + benthic
@@ -482,7 +463,6 @@ MuMIn::r.squaredGLMM(test_therm_pos_bp)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos_bp,type="diag")
 performance::check_collinearity(test_therm_pos_bp)
-sjPlot::plot_model(test_therm_pos_bp,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 ```
 
 ####Pelagic
@@ -502,7 +482,6 @@ MuMIn::r.squaredGLMM(test_therm_pos_p)
 #Model diagnostics
 sjPlot::plot_model(test_therm_pos_p,type="diag")
 performance::check_collinearity(test_therm_pos_p)
-sjPlot::plot_model(test_therm_pos_p,type="eff",terms = c("shift_of_min_sm","thermal_pos[-0.5,0,0.5]"))
 ```
 
 #latitude, fishing, and spatiotemporal mismatches
@@ -520,7 +499,6 @@ summary(test_abs_lat)
 MuMIn::r.squaredGLMM(test_abs_lat)
 #Model diagnostics
 sjPlot::plot_model(test_abs_lat,type="diag")
-sjPlot::plot_model(test_abs_lat,type="eff")
 AIC(test_abs_lat)
 ```
 
@@ -538,7 +516,6 @@ summary(test_abs_lat_sp)
 MuMIn::r.squaredGLMM(test_abs_lat_sp)
 #Model diagnostics
 sjPlot::plot_model(test_abs_lat_sp,type="diag")
-sjPlot::plot_model(test_abs_lat_sp,type="eff",terms=c("abs_latitude_mean","spatial_pos[-0.5,0,0.5]"))
 #AIC
 AIC(test_abs_lat_sp)
 ```
@@ -559,10 +536,6 @@ MuMIn::r.squaredGLMM(test_vul_shift)
 #Model diagnostics
 sjPlot::plot_model(test_vul_shift,type="diag")
 performance::check_collinearity(test_vul_shift)
-sjPlot::plot_model(
-  test_vul_shift,
-  terms=c("shift_of_min_sm","Vulnerability[10,88]"),
-  type = "eff")
 ```
 
 ##pop. trends against vulnerability*shift velocity*spatial pos.
@@ -581,11 +554,6 @@ MuMIn::r.squaredGLMM(test_vul_sp_shift)
 #Model diagnostics
 sjPlot::plot_model(test_vul_sp_shift,type="diag")
 performance::check_collinearity(test_vul_sp_shift)
-sjPlot::plot_model(
-  test_vul_sp_shift,
-  terms=c("shift_of_min_sm","Vulnerability[10,88]","spatial_pos[-0.5,0,0.5]"),
-  type = "eff")+
-  theme_bw()
 ```
 
 ##Pop. trends against commercial level
@@ -602,7 +570,6 @@ summary(test_pop_com)
 MuMIn::r.squaredGLMM(test_pop_com)
 #Model diagnostics
 sjPlot::plot_model(test_pop_com,type="diag")
-sjPlot::plot_model(test_pop_com,type="eff")
 ```
 
 ##Pop. trends against commercial level
@@ -620,9 +587,6 @@ MuMIn::r.squaredGLMM(test_pop_com_shift)
 #Model diagnostics
 performance::check_collinearity(test_pop_com_shift)
 sjPlot::plot_model(test_pop_com_shift,type="diag")
-sjPlot::plot_model(test_pop_com_shift,
-                   type="eff",
-                   terms=c("shift_of_min_sm","spatial_pos[-0.5,0,0.5]","commercial_two_level"))
 ```
 
 #Spatial and temporal mismatch
@@ -642,8 +606,6 @@ MuMIn::r.squaredGLMM(test_spat_mis)
 #Model diagnostics
 sjPlot::plot_model(test_spat_mis,type="diag")
 performance::check_collinearity(test_spat_mis)
-#plot
-sjPlot::plot_model(test_spat_mis,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","bt_bs_dist_of_min_sm[10,100,1000]"))
 ```
 
 ##Temporal mismatch
@@ -662,6 +624,4 @@ MuMIn::r.squaredGLMM(test_tm)
 #Model diagnostics
 sjPlot::plot_model(test_tm,type="diag")
 performance::check_collinearity(test_tm)
-#plot
-sjPlot::plot_model(test_tm,type="eff",terms=c('shift_of_min_sm',"spatial_pos[-0.5,0,0.5]","temporal_mismatch[-50,0,50]"))
 ```
