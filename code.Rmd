@@ -1,12 +1,12 @@
 ---
 title: "code"
-author: "DBPR"
-date: "11/26/2023"
+Code written by: Shahar Chaikin
+date: "10/01/2024"
 output: html_document
 ---
-This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts are not climate change ‘winners’"
-For more information please contact DBPR
+This code details all the analyses and results of the study "Marine fishes experiencing high-velocity range shifts may not be climate change winners.
 
+For more information please contact Shahar Chaikin via shahar710@gmail.com
 
 #Packages
 ```{r}
@@ -17,11 +17,6 @@ library(glmmTMB)
 #Loading the data
 ```{r}
 data=read.csv("data.csv")
-```
-
-Use decimal numbers
-```{r}
-options(scipen=999)
 ```
 
 #main effect
@@ -318,6 +313,7 @@ test_percent_change_gg=ggeffects::ggpredict(test_percent_change,                
 ###Example species
 Example species of extreme range shift velocity and their associated change in population size
 ```{r}
+#Positive 'mean_decline' values denote negative percentage change in population size
 data %>% 
   group_by(species) %>% 
   filter(shift_of_min_sm>=17) %>% 
@@ -326,7 +322,6 @@ data %>%
             mean_decline=(100*(1-exp(mean(ln_ratio_fitted)))) %>% 
               round(digits=2)) %>% 
   arrange(mean_decline,shift,populations)
-#Positive 'mean_decline' values denote negative percentage change in population size
 ```
 
 #Poleward vs. equatorward range shift velocities
